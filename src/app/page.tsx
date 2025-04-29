@@ -13,12 +13,10 @@ type AirtableRecipe = {
   ingredients: string[];
   allergies: string[];
   instructions: string;
-  nutrition: {
-    calories: string;
-    protein: string;
-    carbs: string;
-    fat: string;
-  };
+  calories: string;
+  protein: string;
+  carbs: string;
+  fat: string;
 };
 
 export default function HomePage() {
@@ -52,12 +50,11 @@ export default function HomePage() {
       ingredients: data.ingredients,
       allergies: data.allergies,
       instructions: "Instructions générées...",
-      nutrition: {
-        calories: "0",
-        protein: "0g",
-        carbs: "0g",
-        fat: "0g",
-      },
+      calories: "0",
+      protein: "0g",
+      carbs: "0g",
+      fat: "0g",
+      
     };
     // POST vers Airtable
     const res = await fetch("/api/recipes", {
@@ -81,7 +78,10 @@ export default function HomePage() {
             ingredients={selectedRecipe.ingredients}
             allergies={selectedRecipe.allergies}
             instructions={selectedRecipe.instructions}
-            nutrition={selectedRecipe.nutrition}
+            calories={selectedRecipe.calories}
+            protein={selectedRecipe.protein}
+            carbs={selectedRecipe.carbs}
+            fat={selectedRecipe.fat}
             onBack={() => setSelectedRecipe(null)}
           />
         ) : (
@@ -92,6 +92,7 @@ export default function HomePage() {
               cuisine={recipe.cuisine}
               servings={recipe.servings}
               ingredients={recipe.ingredients}
+              allergies={recipe.allergies}
               onViewDetails={() => setSelectedRecipe(recipe)}
             />
           ))

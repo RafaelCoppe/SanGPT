@@ -6,6 +6,7 @@ type CardRecipeProps = {
   cuisine: string;
   servings: number;
   ingredients: string[];
+  allergies?: string[];
   onViewDetails?: () => void;
 };
 
@@ -14,38 +15,45 @@ export default function CardRecipe({
   cuisine,
   servings,
   ingredients,
+  allergies = [],
   onViewDetails,
 }: CardRecipeProps) {
   return (
-    <div className="bg-[#232323] rounded-xl p-5 mb-6 shadow flex flex-col relative min-w-[340px]">
+    <div className="bg-[#2A2A2A] rounded-xl p-5 mb-6 shadow flex flex-col relative min-w-[340px]">
+      {/* Titre */}
+      <h2 className="text-2xl font-extrabold text-[#FFD466] drop-shadow-md mb-1 tracking-tight">
+        {title}
+      </h2>
+      {/* Type de cuisine */}
+      <span className="text-sm text-[#999999] mb-3 font-semibold uppercase tracking-wide">
+        {cuisine}
+      </span>
+      {/* Badge portions */}
       <div className="absolute top-4 right-4">
-        <span className="bg-black text-xs text-[#fff] px-2 py-1 rounded">
-          {servings} servings
+        <span className="bg-[#111111] text-xs text-[#FFE8B8] px-2 py-1 rounded shadow">
+          {servings} portions
         </span>
       </div>
-      <div>
-        <h2 className="text-[#FFD54F] font-semibold text-lg mb-1">{title}</h2>
-        <div className="text-xs text-[#ccc] mb-3">{cuisine}</div>
-        <div className="mb-2">
-          <span className="text-sm text-[#fff] font-medium">Ingredients:</span>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {ingredients.map((ingredient, idx) => (
-              <span
-                key={idx}
-                className="bg-black text-xs text-[#fff] px-2 py-1 rounded"
-              >
-                {ingredient}
-              </span>
-            ))}
-          </div>
+      {/* Ingrédients */}
+      <div className="mb-2 mt-2">
+        <span className="text-sm text-[#FFE8B8] font-medium">Ingrédients :</span>
+        <div className="flex flex-wrap gap-2 mt-1">
+          {ingredients.map((ingredient, idx) => (
+            <span
+              key={idx}
+              className="bg-[#111111] text-xs text-[#FFE8B8] px-2 py-1 rounded shadow-sm hover:scale-105 transition-transform duration-150"
+            >
+              {ingredient}
+            </span>
+          ))}
         </div>
       </div>
       <div className="flex justify-end mt-4">
         <button
-          className="text-[#FFD54F] text-sm font-medium flex items-center gap-1 hover:underline"
+          className="text-[#FFD466] text-sm font-semibold flex items-center gap-1 hover:text-[#FFE8B8] transition-colors duration-150 group cursor-pointer"
           onClick={onViewDetails}
         >
-          View Details <span aria-hidden>→</span>
+          Voir la recette <span className="transition-transform group-hover:translate-x-1" aria-hidden>→</span>
         </button>
       </div>
     </div>
