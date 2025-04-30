@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import express, { json } from 'express';
 import recipeRouter from './routes/recipeRoutes.js';
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 const app = express();
 
 app.use(json());
