@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  front:
+    container_name: nextjs_front
+    build:
+      context: ./front
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    depends_on:
+      - back
+
+  back:
+    container_name: nodejs_back
+    build:
+      context: ./back
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./back:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
