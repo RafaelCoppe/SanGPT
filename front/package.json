@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 8080",
     "lint": "next lint"
   },
   "dependencies": {
     "airtable": "^0.12.2",
+    "lightningcss": "^1.29.3",
     "next": "15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
