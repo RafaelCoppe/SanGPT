@@ -41,29 +41,17 @@ export default function HomePage() {
   const handleCreateClick = () => setOpen(true);
 
   const handleGenerate = async (data: { ingredients: string[]; allergies: string[]; servings: number }) => {
-    // Ici tu peux appeler ChatGPT puis POST sur /api/recipes
-    // Pour l'exemple, on ajoute une recette factice
-    const newRecipe = {
-      title: "Nouvelle recette",
-      cuisine: "Unknown",
-      servings: data.servings,
-      ingredients: data.ingredients,
-      allergies: data.allergies,
-      instructions: "Instructions générées...",
-      calories: "0",
-      protein: "0g",
-      carbs: "0g",
-      fat: "0g",
-      
-    };
-    // POST vers Airtable
-    const res = await fetch("/api/recipes", {
+    const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newRecipe),
+      body: JSON.stringify(data),
     });
-    const created = await res.json();
-    setRecipes((prev) => [...prev, created]);
+    const result = await res.json();
+    if (result.gptMessage) {
+      alert(result.gptMessage);
+    } else {
+      alert("Erreur lors de la génération de la recette.");
+    }
   };
 
   return (

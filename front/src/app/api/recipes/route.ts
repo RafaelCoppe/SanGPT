@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
-import Airtable from "airtable";
-
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID!);
 
 export async function GET() {
-  const records = await base("Recettes").select().all();
-  const recipes = records.map((rec) => ({
-    id: rec.id,
-    ...rec.fields,
-  }));
-  return NextResponse.json(recipes);
+  // Ici, fais le fetch vers Airtable ou ton backend
+  const res = await fetch("http://back:3000/recipes"); // adapte l'URL si besoin
+  const data = await res.json();
+  return NextResponse.json(data);
 }
