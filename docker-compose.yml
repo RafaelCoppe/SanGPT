@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   front:
-    container_name: nextjs_front
+    container_name: front
     build:
       context: ./front
     ports:
@@ -17,7 +17,7 @@ services:
       - back
 
   back:
-    container_name: nodejs_back
+    container_name: back
     build:
       context: ./back
     ports:
@@ -27,4 +27,6 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - AIRTABLE_API_KEY=patFBUk4mJgXYsjEX.a0e1cc4e9d386d2878e7cb77af7ea78d5430426f4f9517a4e5d0948e6066ab47
+      - AIRTABLE_BASE_ID=appB6WIBl7y8fNWCK
     command: npm run dev
