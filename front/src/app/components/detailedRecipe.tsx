@@ -1,6 +1,9 @@
+"use client";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 type DetailedRecipeProps = {
+  id: string;
   title: string;
   cuisine: string;
   servings: number;
@@ -9,30 +12,29 @@ type DetailedRecipeProps = {
   instructions: string;
   calories: string;
   protein: string;
-  carbs: string;
+  carb: string;
   fat: string;
-  
-  onBack?: () => void;
 };
 
 export default function DetailedRecipe({
+  id,
   title,
   cuisine,
   servings,
   ingredients,
-  allergies,
+  allergies = [],
   instructions,
   calories,
   protein,
-  carbs,
+  carb,
   fat,
-  onBack,
 }: DetailedRecipeProps) {
+  const router = useRouter();
   return (
     <div className="bg-[#2A2A2A] rounded-xl p-8 mt-6 shadow relative max-w-5xl mx-auto">
       <button
         className="text-[#FFD466] text-sm mb-6 hover:underline flex items-center gap-1 cursor-pointer"
-        onClick={onBack}
+        onClick={() => router.back()}
       >
         <span aria-hidden>←</span> Retour aux recettes
       </button>
@@ -89,7 +91,7 @@ export default function DetailedRecipe({
           </div>
           <div className="bg-[#111111] rounded-lg p-4 flex flex-col items-center">
             <div className="text-xs text-[#999999] mb-1">Glucides</div>
-            <div className="text-[#FFD466] text-lg font-bold">{carbs}</div>
+            <div className="text-[#FFD466] text-lg font-bold">{carb}</div>
           </div>
           <div className="bg-[#111111] rounded-lg p-4 flex flex-col items-center">
             <div className="text-xs text-[#999999] mb-1">Lipides</div>

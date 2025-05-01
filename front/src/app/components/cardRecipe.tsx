@@ -1,21 +1,24 @@
 "use client";
 import React from "react";
+import Link from "next/link";
 
 type CardRecipeProps = {
+  id: number;
   title: string;
   cuisine: string;
+  description: string;
   servings: number;
   ingredients: string[];
-  allergies?: string[];
   onViewDetails?: () => void;
 };
 
 export default function CardRecipe({
+  id,
   title,
   cuisine,
+  description,
   servings,
   ingredients,
-  allergies = [],
   onViewDetails,
 }: CardRecipeProps) {
   return (
@@ -28,6 +31,12 @@ export default function CardRecipe({
       <span className="text-sm text-[#999999] mb-3 font-semibold uppercase tracking-wide">
         {cuisine}
       </span>
+      {/* Description */}
+      <span className="text-[#FFE8B8] text-m whitespace-pre-line">
+        {description}
+      </span>
+
+
       {/* Badge portions */}
       <div className="absolute top-4 right-4">
         <span className="bg-[#111111] text-xs text-[#FFE8B8] px-2 py-1 rounded shadow">
@@ -49,12 +58,9 @@ export default function CardRecipe({
         </div>
       </div>
       <div className="flex justify-end mt-4">
-        <button
-          className="text-[#FFD466] text-sm font-semibold flex items-center gap-1 hover:text-[#FFE8B8] transition-colors duration-150 group cursor-pointer"
-          onClick={onViewDetails}
-        >
+        <Link href={`/recipes/${id}`} className="text-[#FFD466] text-sm font-semibold flex items-center gap-1 hover:text-[#FFE8B8] transition-colors duration-150 group cursor-pointer">
           Voir la recette <span className="transition-transform group-hover:translate-x-1" aria-hidden>→</span>
-        </button>
+        </Link>
       </div>
     </div>
   );

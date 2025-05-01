@@ -53,11 +53,11 @@ export default function PopUpCreate({ open, onClose, onGenerate }: PopUpCreatePr
       <div className="bg-[#363636] rounded-xl px-8 py-7 min-w-[370px] max-w-[95vw] w-[420px] shadow-lg flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        <h2 className="text-[#FFD54F] text-xl font-bold mb-6">Create New Recipe</h2>
+        <h2 className="text-[#FFD54F] text-xl font-bold mb-6">Créer une nouvelle recette</h2>
         <div className="flex items-center gap-2 mb-3">
           <input
             type="text"
-            placeholder="Add Ingredient"
+            placeholder="Ajouter un ingrédient"
             value={ingredient}
             onChange={e => setIngredient(e.target.value)}
             className="flex-1 bg-[#222] text-[#fff] px-3 py-2 rounded focus:outline-none"
@@ -68,18 +68,28 @@ export default function PopUpCreate({ open, onClose, onGenerate }: PopUpCreatePr
             onClick={handleAddIngredient}
             type="button"
           >
-            Add
+            Ajouter
           </button>
         </div>
         <div className="flex flex-wrap gap-2 mb-4 ml-1">
           {ingredients.map((ing, idx) => (
-            <span key={idx} className="bg-black text-xs text-[#fff] px-2 py-1 rounded">{ing}</span>
+            <span key={idx} className="bg-black text-xs text-[#fff] px-2 py-1 rounded flex items-center gap-1">
+              {ing}
+              <button
+                type="button"
+                aria-label={`Supprimer ${ing}`}
+                className="ml-1 text-[#FFD54F] hover:text-red-400 font-bold text-base focus:outline-none"
+                onClick={() => setIngredients(ingredients.filter((_, i) => i !== idx))}
+              >
+                ×
+              </button>
+            </span>
           ))}
         </div>
         <div className="flex items-center gap-2 mb-3">
           <input
             type="text"
-            placeholder="Add Allergy"
+            placeholder="Ajouter une allergie"
             value={allergy}
             onChange={e => setAllergy(e.target.value)}
             className="flex-1 bg-[#222] text-[#fff] px-3 py-2 rounded focus:outline-none"
@@ -90,12 +100,22 @@ export default function PopUpCreate({ open, onClose, onGenerate }: PopUpCreatePr
             onClick={handleAddAllergy}
             type="button"
           >
-            Add
+            Ajouter
           </button>
         </div>
         <div className="flex flex-wrap gap-2 mb-4 ml-1">
           {allergies.map((alg, idx) => (
-            <span key={idx} className="bg-black text-xs text-[#fff] px-2 py-1 rounded">{alg}</span>
+            <span key={idx} className="bg-black text-xs text-[#fff] px-2 py-1 rounded flex items-center gap-1">
+              {alg}
+              <button
+                type="button"
+                aria-label={`Supprimer ${alg}`}
+                className="ml-1 text-[#FFD54F] hover:text-red-400 font-bold text-base focus:outline-none"
+                onClick={() => setAllergies(allergies.filter((_, i) => i !== idx))}
+              >
+                ×
+              </button>
+            </span>
           ))}
         </div>
         <div className="flex items-center mb-7">
@@ -107,7 +127,7 @@ export default function PopUpCreate({ open, onClose, onGenerate }: PopUpCreatePr
             onChange={e => setServings(Number(e.target.value))}
             className="bg-[#222] text-[#fff] px-3 py-2 rounded w-16 text-center focus:outline-none"
           />
-          <span className="text-[#fff] ml-2">personnes.</span>
+          <span className="text-[#fff] ml-2">personne(s).</span>
         </div>
         <div className="flex justify-end gap-4 mt-2">
           <button
@@ -115,14 +135,14 @@ export default function PopUpCreate({ open, onClose, onGenerate }: PopUpCreatePr
             onClick={onClose}
             type="button"
           >
-            Cancel
+            Annuler
           </button>
           <button
             className="bg-[#FFD54F] text-[#222] font-semibold px-6 py-2 rounded hover:bg-[#ffe082] transition"
             onClick={handleGenerate}
             type="button"
           >
-            Generate Recipe
+            Générer la recette
           </button>
         </div>
       </div>
