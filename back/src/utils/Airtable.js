@@ -9,9 +9,11 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
 
 // Définition des tables et de leurs ID
 const tables = {
-  user: base("tblrgJu6w3rzL1RXm"), // Remplace 'Table1' par le nom de ta table
-  recette: base("tblsmYQ4ePLjVW4wp"), // Remplace 'Table2' par le nom de ta table
-  ingredients: base("tbl1EHW7WoZWRN8P7"), // Remplace 'Table2' par le nom de ta table
+  user: base("tblrgJu6w3rzL1RXm"),
+  recette: base("tblsmYQ4ePLjVW4wp"),
+  ingredients: base("tbl1EHW7WoZWRN8P7"),
+  cuisine: base("tblWS9YP7asfCC1oc"),
+  allergies: base("tbl2sPD9B5u8SPurF"), 
   // Ajoute ici d'autres tables si nécessaire
 };
 
@@ -30,7 +32,7 @@ const getRecords = async (tableName) => {
 const createRecord = async (tableName, fields) => {
   try {
     const createdRecord = await tables[tableName].create([{ fields }]);
-    return createdRecord[0].fields;
+    return { id: createdRecord[0].id, ...createdRecord[0].fields };
   } catch (error) {
     console.error("Erreur de création de donnée :", error);
     throw error;
@@ -64,6 +66,16 @@ export default {
     get: () => getRecords("ingredients"),
     getById: (id) => getRecordById("ingredients", id),
     create: (fields) => createRecord("ingredients", fields),
+  },
+  cuisine: {
+    get: () => getRecords("cuisine"),
+    getById: (id) => getRecordById("cuisine", id),
+    create: (fields) => createRecord("cuisine", fields),
+  },
+  allergies: {
+    get: () => getRecords("allergies"),
+    getById: (id) => getRecordById("allergies", id),
+    create: (fields) => createRecord("allergies", fields),
   },
   // Ajoute ici des méthodes pour d'autres tables si nécessaire
 };

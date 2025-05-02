@@ -2,6 +2,9 @@ import dotenv from "dotenv";
 import express, { json } from "express";
 import fetch from "node-fetch";
 import recipeRouter from "./routes/recipeRoutes.js";
+import ingredientRouter from "./routes/ingredientRoutes.js";
+import allergyRouter from "./routes/allergyRoute.js";
+import cuisineRouter from "./routes/cuisineRoutes.js";
 
 dotenv.config({ path: ".env.local" });
 const app = express();
@@ -53,6 +56,95 @@ app.post("/gpt-recipe", async (req, res) => {
       });
     }
 
+    // Vérifie et crée les ingrédients si besoin
+    if (Array.isArray(recipeJson.ingredients)) {
+      const ingredientIds = [];
+      for (const ingredient of recipeJson.ingredients) {
+        try {
+          const resp = await fetch("http://localhost:3000/ingredients", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: ingredient }),
+          });
+          if (resp.ok) {
+            const ingredientData = await resp.json();
+            // Adapte ce champ selon ta réponse (id, recordId, etc.)
+            ingredientIds.push(ingredientData.id || ingredientData.recordId);
+          }
+        } catch (err) {
+          console.error(`Erreur lors de la création de l'ingrédient ${ingredient}:`, err.message);
+        }
+      }
+      // Remplace la liste d'ingrédients par la liste d'IDs pour Airtable
+      recipeJson.ingredients = ingredientIds;
+    }
+
+    // Vérifie et crée la cuisine si besoin
+    if (recipeJson.cuisine) {
+      try {
+        // Cherche si la cuisine existe déjà
+        const searchCuisine = await fetch(`http://localhost:3000/cuisines?name=${encodeURIComponent(recipeJson.cuisine)}`);
+        let cuisineId;
+        if (searchCuisine.ok) {
+          const cuisines = await searchCuisine.json();
+          const found = cuisines.find(c => c.name.toLowerCase() === recipeJson.cuisine.toLowerCase());
+          if (found) {
+            cuisineId = found.id;
+          }
+        }
+        // Si pas trouvée, on la crée
+        if (!cuisineId) {
+          const resp = await fetch("http://localhost:3000/cuisines", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: recipeJson.cuisine }),
+          });
+          if (resp.ok) {
+            const cuisineData = await resp.json();
+            cuisineId = cuisineData.id || cuisineData.recordId;
+          }
+        }
+        recipeJson.cuisine = [cuisineId];
+      } catch (err) {
+        console.error(`Erreur lors de la création ou récupération de la cuisine ${recipeJson.cuisine}:`, err.message);
+      }
+    }
+
+    // Vérifie et crée les allergies si besoin
+    if (Array.isArray(recipeJson.allergies)) {
+      const allergyIds = [];
+      for (const allergy of recipeJson.allergies) {
+        try {
+          // Cherche si l'allergie existe déjà
+          const searchAllergy = await fetch(`http://localhost:3000/allergies?name=${encodeURIComponent(allergy)}`);
+          let allergyId;
+          if (searchAllergy.ok) {
+            const allergies = await searchAllergy.json();
+            const found = allergies.find(a => a.name.toLowerCase() === allergy.toLowerCase());
+            if (found) {
+              allergyId = found.id;
+            }
+          }
+          // Si pas trouvée, on la crée
+          if (!allergyId) {
+            const resp = await fetch("http://localhost:3000/allergies", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: allergy }),
+            });
+            if (resp.ok) {
+              const allergyData = await resp.json();
+              allergyId = allergyData.id || allergyData.recordId;
+            }
+          }
+          if (allergyId) allergyIds.push(allergyId);
+        } catch (err) {
+          console.error(`Erreur lors de la création ou récupération de l'allergie ${allergy}:`, err.message);
+        }
+      }
+      recipeJson.allergies = allergyIds;
+    }
+
     // Appel POST interne pour créer la recette dans Airtable
     const airtableRes = await fetch("http://localhost:3000/recipes", {
       method: "POST",
@@ -78,6 +170,9 @@ app.post("/gpt-recipe", async (req, res) => {
 });
 
 app.use(recipeRouter);
+app.use(ingredientRouter);
+app.use(allergyRouter);
+app.use(cuisineRouter);
 
 const PORT = process.env.PORT || 3000;
 
