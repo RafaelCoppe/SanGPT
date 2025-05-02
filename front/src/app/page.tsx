@@ -6,16 +6,17 @@ import PopUpCreate from "./components/popUpCreate";
 import DetailedRecipe from "./components/detailedRecipe";
 
 type AirtableRecipe = {
-  id: string;
+  id: number;
   title: string;
   cuisine: string;
+  description: string;
   servings: number;
   ingredients: string[];
   allergies: string[];
   instructions: string;
   calories: string;
   protein: string;
-  carbs: string;
+  carb: string;
   fat: string;
 };
 
@@ -23,6 +24,11 @@ export default function HomePage() {
   const [open, setOpen] = useState(false);
   const [recipes, setRecipes] = useState<AirtableRecipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<AirtableRecipe | null>(null);
+
+  const cuisines = Array.from(new Set(recipes.map(r => r.cuisine).filter(Boolean)));
+  // Filtres
+  const [search, setSearch] = useState('');
+  const [filterCuisine, setFilterCuisine] = useState('');
 
   // Récupère les recettes depuis l'API Airtable
   useEffect(() => {
@@ -41,35 +47,36 @@ export default function HomePage() {
   const handleCreateClick = () => setOpen(true);
 
   const handleGenerate = async (data: { ingredients: string[]; allergies: string[]; servings: number }) => {
-    // Ici tu peux appeler ChatGPT puis POST sur /api/recipes
-    // Pour l'exemple, on ajoute une recette factice
-    const newRecipe = {
-      title: "Nouvelle recette",
-      cuisine: "Unknown",
-      servings: data.servings,
-      ingredients: data.ingredients,
-      allergies: data.allergies,
-      instructions: "Instructions générées...",
-      calories: "0",
-      protein: "0g",
-      carbs: "0g",
-      fat: "0g",
-      
-    };
-    // POST vers Airtable
-    const res = await fetch("/api/recipes", {
+    const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newRecipe),
+      body: JSON.stringify(data),
     });
-    const created = await res.json();
-    setRecipes((prev) => [...prev, created]);
+    const result = await res.json();
+    if (res.ok) {
+      console.log(result.gptMessage);
+    } else {
+      console.log("Erreur lors de la génération de la recette.");
+    }
   };
+
+  // Filtrage des recettes selon la recherche et le filtre cuisine
+  const filteredRecipes = recipes.filter(recipe =>
+    recipe.title.toLowerCase().includes(search.toLowerCase()) &&
+    (filterCuisine === '' || recipe.cuisine === filterCuisine)
+  );
 
   return (
     <div className="min-h-screen bg-[#181818]">
-      <Header onCreateRecipe={handleCreateClick} />
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <Header
+        onCreateRecipe={handleCreateClick}
+        search={search}
+        setSearch={setSearch}
+        filterCuisine={filterCuisine}
+        setFilterCuisine={setFilterCuisine}
+        cuisines={cuisines}
+      />
+      <main className="max-w-6xl mx-auto px-4 py-8">
         {selectedRecipe ? (
           <DetailedRecipe
             title={selectedRecipe.title}
@@ -80,22 +87,25 @@ export default function HomePage() {
             instructions={selectedRecipe.instructions}
             calories={selectedRecipe.calories}
             protein={selectedRecipe.protein}
-            carbs={selectedRecipe.carbs}
+            carb={selectedRecipe.carb}
             fat={selectedRecipe.fat}
             onBack={() => setSelectedRecipe(null)}
           />
         ) : (
-          recipes.map((recipe) => (
-            <CardRecipe
-              key={recipe.id}
-              title={recipe.title}
-              cuisine={recipe.cuisine}
-              servings={recipe.servings}
-              ingredients={recipe.ingredients}
-              allergies={recipe.allergies}
-              onViewDetails={() => setSelectedRecipe(recipe)}
-            />
-          ))
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredRecipes.map((recipe: AirtableRecipe, idx) => (
+              <CardRecipe
+                key={recipe.id || idx}
+                id={recipe.id}
+                title={recipe.title}
+                cuisine={recipe.cuisine}
+                description={recipe.description}
+                servings={recipe.servings}
+                ingredients={recipe.ingredients}
+                onViewDetails={() => setSelectedRecipe(recipe)}
+              />
+            ))}
+          </div>
         )}
       </main>
       <PopUpCreate open={open} onClose={() => setOpen(false)} onGenerate={handleGenerate} />
