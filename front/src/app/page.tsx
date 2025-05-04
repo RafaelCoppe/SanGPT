@@ -30,6 +30,36 @@ export default function HomePage() {
   const [search, setSearch] = useState('');
   const [filterCuisine, setFilterCuisine] = useState('');
 
+  const normalize = (str: string) =>
+    str
+      .normalize("NFD")                // Décompose les caractères accentués (é → e + ́)
+      .replace(/[\u0300-\u036f]/g, "") // Supprime les marques diacritiques
+      .toLowerCase();                  // Minuscule
+
+  const getSearchData = () => {
+    const phraseMatches = [...search.matchAll(/"([^"]+)"/g)].map(m => normalize(m[1]));
+    const rest = normalize(search.replace(/"[^"]+"/g, ''));
+    const wordMatches = rest.split(/\s+/).filter(Boolean);
+
+    const matchesKeywords = (text: string | string[]): boolean =>
+      words.some((keyword: string) => {
+        if (Array.isArray(text)) {
+          return text.some(t => normalize(t).includes(keyword));
+        }
+        return normalize(text).includes(keyword);
+      });
+
+    const matchesPhrases = (text: string | string[]) =>
+      phrases.some(phrase => {
+        if (Array.isArray(text)) {
+          return text.some(t => normalize(t).includes(phrase));
+        }
+        return normalize(text).includes(phrase);
+      });
+
+    return { words: wordMatches, phrases: phraseMatches, matchesKeywords, matchesPhrases };
+  }
+
   // Récupère les recettes depuis l'API Airtable
   useEffect(() => {
     fetch("/api/recipes")
@@ -60,11 +90,21 @@ export default function HomePage() {
     }
   };
 
-  // Filtrage des recettes selon la recherche et le filtre cuisine
+  const { words, phrases, matchesKeywords, matchesPhrases } = getSearchData()
+
   const filteredRecipes = recipes.filter(recipe =>
-    recipe.title.toLowerCase().includes(search.toLowerCase()) &&
+    (
+      (words.length === 0 && phrases.length === 0) ||
+      matchesKeywords(recipe.title) ||
+      matchesKeywords(recipe.description) ||
+      matchesKeywords(recipe.ingredients) ||
+      matchesPhrases(recipe.title) ||
+      matchesPhrases(recipe.description) ||
+      matchesPhrases(recipe.ingredients)
+    ) &&
     (filterCuisine === '' || recipe.cuisine === filterCuisine)
   );
+
 
   return (
     <div className="min-h-screen bg-[#181818]">
@@ -93,18 +133,32 @@ export default function HomePage() {
           />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredRecipes.map((recipe: AirtableRecipe, idx) => (
-              <CardRecipe
-                key={recipe.id || idx}
-                id={recipe.id}
-                title={recipe.title}
-                cuisine={recipe.cuisine}
-                description={recipe.description}
-                servings={recipe.servings}
-                ingredients={recipe.ingredients}
-                onViewDetails={() => setSelectedRecipe(recipe)}
-              />
-            ))}
+            {
+              filteredRecipes.length === 0 ? (
+                search.length > 0 ? (
+                  <div className="col-span-1 md:col-span-2 text-center text-[#ccc]">
+                    Aucune recette trouvée pour cette recherche.
+                  </div>
+                ) : (
+                  // Loader animé
+                  <div className="col-span-1 md:col-span-2 flex items-center justify-center">
+                    <img src="/img/loader.gif" alt="Loading..." className="h-32  w-32" />
+                  </div>
+                )
+              ) : (
+                filteredRecipes.map((recipe: AirtableRecipe, idx) => (
+                  <CardRecipe
+                    key={recipe.id || idx}
+                    id={recipe.id}
+                    title={recipe.title}
+                    cuisine={recipe.cuisine}
+                    description={recipe.description}
+                    servings={recipe.servings}
+                    ingredients={recipe.ingredients}
+                    onViewDetails={() => setSelectedRecipe(recipe)}
+                  />
+                ))
+              )}
           </div>
         )}
       </main>
