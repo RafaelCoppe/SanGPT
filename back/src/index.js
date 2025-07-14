@@ -17,11 +17,22 @@ app.get("/ping", (req, res) => {
 
 app.post("/gpt-recipe", async (req, res) => {
   const { ingredients, allergies, servings } = req.body;
-  const prompt = `Crée une recette originale pour ${servings} personnes avec ces ingrédients : ${ingredients?.join(
+  const prompt = `Tu es un chef cuisinier expert. Crée une recette savoureuse et équilibrée pour ${servings} personnes en utilisant principalement ces ingrédients : ${ingredients?.join(
     ", "
-  )}. Prends en compte ces allergies : ${allergies?.join(
+  )}. Tu peux ajouter des ingrédients complémentaires essentiels comme des épices, assaisonnements, huiles, herbes aromatiques, et des accompagnements simples (riz, pâtes, légumes de base) pour créer un plat complet et réaliste. Évite absolument ces allergènes : ${allergies?.join(
     ", "
-  )}. Réponds en français. Retourne uniquement un JSON strictement valide avec les champs suivants : title, description, ingredients, cuisine, servings, instructions, calories, protein, carb, fat, vitamines, mineraux, allergies. Pour les allergies, renvoie une valeur tableau, même soi il n'y a aucune allergies, indique simplement "Aucune". Ne précise pas les quantités des ingrédients, mais donne les instructions de préparation et écrit les en minuscule. Pour les vitamines, indique seulement la lettre en majuscule, et les minéraux avec une majuscule pour la première lettre. Pour tous les nutriments, mets simplement le nombre, pas l'unité et réfléchis bien à tous les apports. Ne donne pas d'autres informations que le JSON demandé.`;
+  )}. 
+
+Assure-toi que :
+- La recette soit réalisable avec des techniques de cuisine courantes
+- Les temps de cuisson et les étapes soient logiques
+- Les saveurs s'harmonisent bien ensemble
+- Le plat soit nutritionnellement équilibré
+- Les quantités d'ingrédients ajoutés restent raisonnables
+
+Réponds en français. Retourne uniquement un JSON strictement valide avec les champs suivants : title, description, ingredients, cuisine, servings, instructions, calories, protein, carb, fat, vitamines, mineraux, allergies. 
+
+Pour les allergies, renvoie un tableau même s'il n'y en a aucune (indique "Aucune"). Dans ingredients, inclus TOUS les ingrédients nécessaires (fournis + ajoutés). Ne précise pas les quantités des ingrédients, mais donne des instructions de préparation détaillées et écrites en minuscules. Pour les vitamines, indique seulement la lettre en majuscule, et les minéraux avec une majuscule pour la première lettre. Pour tous les nutriments, mets simplement le nombre sans unité en réfléchissant bien aux apports nutritionnels réels. Ne donne pas d'autres informations que le JSON demandé.`;
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {

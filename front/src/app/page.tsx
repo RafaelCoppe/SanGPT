@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import CardRecipe from "./components/cardRecipe";
 import PopUpCreate from "./components/popUpCreate";
 import DetailedRecipe from "./components/detailedRecipe";
+import Swal from "sweetalert2";
 
 type AirtableRecipe = {
   id: number;
@@ -24,6 +25,8 @@ export default function HomePage() {
   const [open, setOpen] = useState(false);
   const [recipes, setRecipes] = useState<AirtableRecipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<AirtableRecipe | null>(null);
+  const [updateRecipes, setUpdateRecipes] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const cuisines = Array.from(new Set(recipes.map(r => r.cuisine).filter(Boolean)));
   // Filtres
@@ -62,21 +65,27 @@ export default function HomePage() {
 
   // Récupère les recettes depuis l'API Airtable
   useEffect(() => {
+    setIsLoading(true);
     fetch("/api/recipes")
       .then((res) => {
         if (!res.ok) throw new Error("Erreur API");
         return res.json();
       })
-      .then((data) => setRecipes(data))
+      .then((data) => {
+        setRecipes(data);
+        setIsLoading(false);
+      })
       .catch((err) => {
         console.error("Erreur lors du fetch des recettes :", err);
         setRecipes([]);
+        setIsLoading(false);
       });
-  }, []);
+  }, [updateRecipes]);
 
   const handleCreateClick = () => setOpen(true);
 
   const handleGenerate = async (data: { ingredients: string[]; allergies: string[]; servings: number }) => {
+    setIsLoading(true);
     const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -84,9 +93,19 @@ export default function HomePage() {
     });
     const result = await res.json();
     if (res.ok) {
-      console.log(result.gptMessage);
+      setUpdateRecipes(!updateRecipes);
+      Swal.fire({
+        icon: "success",
+        title: "Recette générée",
+        text: "Votre recette a été générée avec succès !",
+      });
     } else {
-      console.log("Erreur lors de la génération de la recette.");
+      setIsLoading(false);
+      Swal.fire({
+        icon: "error",
+        title: "Erreur",
+        text: "Une erreur est survenue lors de la génération de la recette.",
+      });
     }
   };
 
@@ -139,12 +158,7 @@ export default function HomePage() {
                   <div className="col-span-1 md:col-span-2 text-center text-[#ccc]">
                     Aucune recette trouvée pour cette recherche.
                   </div>
-                ) : (
-                  // Loader animé
-                  <div className="col-span-1 md:col-span-2 flex items-center justify-center">
-                    <img src="/img/loader.gif" alt="Loading..." className="h-32  w-32" />
-                  </div>
-                )
+                ) : null
               ) : (
                 filteredRecipes.map((recipe: AirtableRecipe, idx) => (
                   <CardRecipe
@@ -163,6 +177,13 @@ export default function HomePage() {
         )}
       </main>
       <PopUpCreate open={open} onClose={() => setOpen(false)} onGenerate={handleGenerate} />
+      
+      {/* Loader plein écran */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <img src="/img/loader.gif" alt="Loading..." className="h-32 w-32" />
+        </div>
+      )}
     </div>
   );
 }

@@ -18,10 +18,18 @@ const tables = {
 };
 
 // Crée une fonction pour obtenir toutes les données d'une table
-const getRecords = async (tableName) => {
+const getRecords = async (tableName, field, order) => {
   try {
-    const records = await tables[tableName].select().all();
-    return records.map((record) => ({ id: record.id, ...record.fields }));
+    let records = await tables[tableName].select().all();
+    records = records.map((record) => ({ id: record.id, ...record.fields }));
+    if(field && order) {
+      records.sort((a, b) => {
+        if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
+        if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return records;
   } catch (error) {
     console.error("Erreur de récupération des données :", error);
     throw error;
@@ -58,7 +66,7 @@ export default {
     create: (fields) => createRecord("user", fields),
   },
   recette: {
-    get: () => getRecords("recette"),
+    get: () => getRecords("recette", 'date_create', 'desc'),
     getById: (id) => getRecordById("recette", id),
     create: (fields) => createRecord("recette", fields),
   },
