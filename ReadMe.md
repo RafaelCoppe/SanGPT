@@ -15,21 +15,26 @@ Bienvenue dans **SanGPT**, l'application qui mélange la puissance d'un chef pir
 2. Installe les dépendances (Next.js, Airtable) :
 
    ```bash
+   cd back
+   npm install
+
+   cd ../front
    npm install
    ```
 
 3. Configure ton `.env.local` :
 
    ```env
-   AIRTABLE_KEY=change_me
+   OPENAI_API_KEY=change_me
+   PORT=3000
+   AIRTABLE_API_KEY=change_me
    AIRTABLE_BASE_ID=change_me
-   NEXT_PUBLIC_JWT_SECRET=change_me
    ```
 
 4. Lance l'appli :
 
    ```bash
-   npm run dev
+   docker compose up -d
    ```
 
 5. Navigue vers [http://localhost:3000](http://localhost:3000) et régale-toi. 🍴
@@ -50,12 +55,3 @@ Bienvenue dans **SanGPT**, l'application qui mélange la puissance d'un chef pir
 - Front-end : Next.js
 - Base de données : Airtable
 - IA : intégration de ChatGPT
-
----
-
-## ⚡ To-Do
-
-
-
-## 📜 Licence
-
